@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio</title>
+
+    <style>
+        @font-face {
+            font-family: 'ScienceGothic';
+            src: url('./fonts/science-gothic.ttf') format('truetype');
+            font-weight: 100 900;
+            font-display: swap;
+        }
+
+        :root {
+            --bg-color: #000000;
+            --card-bg: rgba(20, 20, 20, 0.6);
+            --text-color: #ffffff;
+            --main-color: #3a42acea;
+            --gap: 15px;
+            --main-height: clamp(90px, 12vw, 160px);
+            --main-width: var(--main-height);
+            --hover-bg: #ffffff;
+            --hover-text: #000000;
+            --active-lang-bg: rgba(22, 61, 167, 0.473);
+            --active-lang-border: var(--main-color);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+            --anim-duration: 0.5s;
+            --expanded-bg: #0c0c0c;
+        }
+
+        body.light-mode {
+            --bg-color: #f0f0f0;
+            --text-color: #000000;
+            --card-bg: #ffffff;
+            --hover-bg: #000000;
+            --hover-text: #ffffff;
+            --active-lang-bg: #000000;
+            --active-lang-border: #000000;
+            --border-color: #e9e9e9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'ScienceGothic', sans-serif;
+        }
+
+        html { scrollbar-width: none; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-y: scroll;
+            overflow-x: hidden;
+            transition: background-color 0.4s ease;
+            -ms-overflow-style: none;
+            scrollbar-gutter: stable;
+        }
+
+        body::-webkit-scrollbar { display: none; }
+
+        #grid-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: url('grid-dark.svg');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        body.light-mode #grid-bg { filter: invert(1); opacity: 0.1; }
+
+        #fluid { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+
+        .no-scroll { overflow: hidden !important; touch-action: none; }
+
+        #preloader {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 9999;
+            pointer-events: none;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+
+        body.card-open #preloader { opacity: 0; visibility: hidden; }
+
+        #preloader::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: #ffffff;
+            transition: opacity 0.8s ease-in-out;
+            z-index: -1;
+        }
+
+        #load {
+            width: 205px; height: 205px;
+            border-radius: 50%;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: conic-gradient(var(--main-color) 0deg, #e6e7eb 0deg);
+            z-index: 10000;
+            transition: top 1.2s cubic-bezier(0.5, 0, 0.2, 1), 
+                        left 1.2s cubic-bezier(0.5, 0, 0.2, 1), 
+                        width 1.2s cubic-bezier(0.5, 0, 0.2, 1), 
+                        height 1.2s cubic-bezier(0.5, 0, 0.2, 1), 
+                        transform 1.2s cubic-bezier(0.5, 0, 0.2, 1), 
+                        background-color 0.5s ease, 
+                        border-radius 1.2s ease;
+        }
+
+        .inner-logo {
+            position: absolute;
+            width: 195px; height: 195px;
+            border-radius: 50%;
+            object-fit: cover;
+            z-index: 10005;
+            background-color: #e6e7eb;
+            cursor: pointer;
+            transition: width 1.2s cubic-bezier(0.5, 0, 0.2, 1), 
+                        height 1.2s cubic-bezier(0.5, 0, 0.2, 1),
+                        border-radius 1.2s ease;
+        }
+
+        .morph-animation #load {
+            top: 15px; left: 15px;
+            transform: translate(0, 0);
+            width: var(--main-width);
+            height: var(--main-height);
+            border-radius: 6px;
+            background-color: var(--card-bg) !important;
+            background-image: none !important;
+            border: 1px solid var(--border-color);
+            pointer-events: all;
+        }
+
+        .morph-blur #load { backdrop-filter: blur(16px); }
+        .morph-animation #load .inner-logo { width: 100%; height: 100%; border-radius: 6px; }
+        .preloader-hidden::before { opacity: 0 !important; }
+
+        /* === КАРТОЧКИ === */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(16px);
+            cursor: pointer;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            border-radius: 6px;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-color);
+            position: relative;
+        }
+
+        .card:not(.active):not(.talk-cube):not(.work-card):hover {
+            background-color: var(--hover-bg);
+            color: var(--hover-text);
+            border-color: var(--hover-bg);
+        }
+
+        .lang-card { flex: 1; justify-content: center; font-weight: 500; }
+        .lang-card.active {
+            background-color: var(--active-lang-bg) !important;
+            border-color: var(--active-lang-border) !important;
+            color: #ffffff !important;
+            cursor: default;
+        }
+
+        /* --- РАБОТЫ (ФИКС БОРДЕРА) --- */
+        .work-card { 
+            aspect-ratio: 1 / 1; 
+            width: 100%; 
+            position: relative; 
+            border: none !important;
+            background: transparent !important;
+            overflow: hidden;
+            border-radius: 6px;
+        }
+
+        /* Рамка ПОВЕРХ картинки */
+        .work-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            z-index: 2; 
+            pointer-events: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .work-card:not(.is-expanded):hover::after {
+            border-color: #ffffff !important;
+        }
+
+        .card-bg-clone {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            z-index: 0;
+            transition: background 0.3s ease;
+        }
+
+        .work-card:not(.is-expanded):hover .card-bg-clone {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .work-cover {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            transition: border-radius var(--anim-duration) var(--ease-out-cubic);
+        }
+
+        .work-card.is-expanded {
+            aspect-ratio: unset !important;
+            cursor: pointer;
+            z-index: 1000000 !important;
+            pointer-events: all !important;
+        }
+
+        .work-card.is-expanded::after { border-color: transparent !important; }
+
+        .work-card.is-expanded .card-bg-clone {
+            background-color: var(--expanded-bg) !important;
+            backdrop-filter: none;
+        }
+
+        .work-card.is-expanded .work-cover { border-radius: 0; object-fit: contain !important; }
+
+        /* --- ВЕРСТКА --- */
+        .content-wrapper { position: relative; z-index: 2; display: flex; gap: var(--gap); padding: 0 15px 15px; margin-top: 15px; opacity: 0; transition: opacity 1s ease 0.5s; width: 100%; }
+        .content-visible { opacity: 1; }
+        .left-col { width: 30%; min-width: 320px; height: calc(100vh - 30px); position: sticky; top: 15px; display: flex; flex-direction: column; gap: var(--gap); }
+        .top-row { display: grid; grid-template-columns: min-content 1fr; gap: var(--gap); }
+        .square-placeholder { width: var(--main-width); height: var(--main-height); flex-shrink: 0; }
+        .rect-container { display: flex; flex-direction: column; gap: var(--gap); height: var(--main-height); min-width: 0; }
+        .rect-card-top a { display: block; width: 100%; padding: 25px 15px; text-align: center; font-weight: 500; font-size: 20px; text-decoration: none; color: inherit; overflow: hidden; text-overflow: ellipsis; }
+        .rect-row-bottom { flex: 1; display: flex; gap: var(--gap); }
+        .left-cube { flex-grow: 1; min-height: 220px; display: flex; flex-direction: column; padding: 24px; align-items: flex-start; justify-content: flex-start; text-align: left; }
+        .left-cube p { margin: 0; opacity: 0.6; line-height: 1.4; transition: color 0.3s; }
+        .left-cube .spacer { height: 15px; }
+        .extra-text-wrapper { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); width: 100%; }
+        .left-col.expanded-mode #expandable-cube { flex-grow: 10; }
+        .left-col.expanded-mode .extra-text-wrapper { max-height: 500px; opacity: 1; }
+        .bottom-group { display: flex; flex-direction: column; gap: var(--gap); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); max-height: 300px; opacity: 1; }
+        .left-col.expanded-mode .bottom-group { max-height: 0; opacity: 0; pointer-events: none; margin-top: -15px; }
+        .talk-cube { height: 60px; min-height: 60px; font-size: 1.2rem; font-weight: bold; }
+        .talk-cube:hover { background-color: var(--main-color) !important; border-color: var(--main-color) !important; }
+        .talk-cube a { display: flex; width: 100%; height: 100%; justify-content: flex-end; padding: 0 24px; font-weight: 500; text-decoration: none; color: inherit; align-items: center; transition: color 0.3s; }
+        .talk-cube:hover a { color: #fff !important; }
+        .clock-cube { flex-grow: 1; min-height: 160px; justify-content: flex-end; padding: 0 24px; transform-style: preserve-3d; }
+        #time-display { font-size: 1.3rem; font-weight: 500; opacity: 0.6; font-variant-numeric: tabular-nums; }
+        .clock-container { display: flex; flex-direction: column; align-items: flex-end; }
+        .clock-cube.flip-effect { animation: single-flip 0.6s ease-in-out; }
+        @keyframes single-flip { 0% { transform: perspective(800px) rotateX(0deg); } 50% { background-color: var(--hover-bg); color: var(--hover-text); } 100% { transform: perspective(800px) rotateX(360deg); } }
+        .right-col { flex-grow: 1; display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: min-content; gap: var(--gap); }
+        .card-placeholder { width: 100%; aspect-ratio: 1 / 1; visibility: hidden; }
+
+        @media (max-width: 1240px) { .content-wrapper { flex-direction: column; } .left-col { width: 100%; height: auto; position: relative; top: 0; } }
+    </style>
+</head>
+
+<body class="no-scroll">
+    <div id="grid-bg"></div>
+    <div id="fluid"></div>
+
+    <div id="preloader">
+        <div id="load"><img src="logo.jpg" alt="Logo" class="inner-logo" id="avatar-btn"></div>
+    </div>
+
+    <div class="content-wrapper" id="content">
+        <div class="left-col">
+            <div class="top-row">
+                <div class="square-placeholder"></div>
+                <div class="rect-container">
+                    <div class="card rect-card-top"><a href="https://funpay.com/users/15227343/" target="_blank">Luminarys</a></div>
+                    <div class="rect-row-bottom">
+                        <div class="card lang-card active" id="btn-ru" onclick="setLanguage('ru')">RU</div>
+                        <div class="card lang-card" id="btn-eng" onclick="setLanguage('eng')">ENG</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card left-cube" id="expandable-cube">
+                <div id="bio-text">
+                    <p>Technical Developer</p>
+                    <p>— От кастомных плагинов и сайтов до комплексной архитектуры игровых серверов.</p>
+                    <div class="spacer"></div>
+                    <p>30+ реализованных проектов.</p>
+                    <p>4 года опыта в разработке для Minecraft.</p>
+                    <p>Java | Spigot/Paper | Web-технологии</p>
+                </div>
+                <div class="extra-text-wrapper">
+                    <div class="extra-text" id="extra-content">
+                        <div class="spacer"></div>
+                        <p>Photoshop |Java | HTML/CSS | JavaScript | SQL | Docker</p>
+                        <div class="spacer"></div>
+                        <p>Создаю комплексные решения для игровых проектов.</p>
+                        <p>Пишите в ЛС — обсудим детали.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-group">
+                <div class="card talk-cube"><a href="https://funpay.com/lots/offer?id=66363804" target="_blank" id="talk-btn">Обсуждуние проекта</a></div>
+                <div class="card clock-cube" id="clock-btn">
+                    <div class="clock-container"><span id="time-display">00:00:00</span><span style="opacity: 0.6; font-size: 0.9rem; margin-top: 4px;" id="location-text">/ Москва</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-col">
+            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover1.png" class="work-cover" alt="c1"><div class="card-bg-clone"></div></div>
+            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover2.png" class="work-cover" alt="c2"><div class="card-bg-clone"></div></div>
+            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover3.png" class="work-cover" alt="c3"><div class="card-bg-clone"></div></div>
+            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover4.png" class="work-cover" alt="c4"><div class="card-bg-clone"></div></div>
+            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover5.png" class="work-cover" alt="c5"><div class="card-bg-clone"></div></div>
+            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover6.png" class="work-cover" alt="c6"><div class="card-bg-clone"></div></div>
+            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover7.png" class="work-cover" alt="c7"><div class="card-bg-clone"></div></div>
+            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover8.png" class="work-cover" alt="c8"><div class="card-bg-clone"></div></div>
+            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover9.png" class="work-cover" alt="c9"><div class="card-bg-clone"></div></div>
+            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover10.png" class="work-cover" alt="c10"><div class="card-bg-clone"></div></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
+    <script>
+        const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smooth: true });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
+
+        let activeCard = null;
+        let cardPlaceholder = null;
+        let isAnimating = false;
+
+        function toggleCard(card) {
+            if (isAnimating) return;
+            if (activeCard && activeCard !== card) return;
+            isAnimating = true;
+
+            if (card.classList.contains('is-expanded')) {
+                const rect = cardPlaceholder.getBoundingClientRect();
+                card.style.top = rect.top + 'px';
+                card.style.left = rect.left + 'px';
+                card.style.width = rect.width + 'px';
+                card.style.height = rect.height + 'px';
+                card.classList.remove('is-expanded');
+                document.body.classList.remove('card-open');
+
+                setTimeout(() => {
+                    card.style.transition = 'none';
+                    card.style.position = '';
+                    card.style.top = ''; card.style.left = '';
+                    card.style.width = ''; card.style.height = '';
+                    card.style.zIndex = '';
+                    if (cardPlaceholder) cardPlaceholder.remove();
+                    cardPlaceholder = null; activeCard = null;
+                    document.body.classList.remove('no-scroll');
+                    lenis.start();
+                    isAnimating = false;
+                }, 500);
+            } else {
+                activeCard = card;
+                const rect = card.getBoundingClientRect();
+                lenis.stop();
+                document.body.classList.add('no-scroll');
+                document.body.classList.add('card-open');
+
+                cardPlaceholder = document.createElement('div');
+                cardPlaceholder.className = 'card-placeholder';
+                cardPlaceholder.style.width = rect.width + 'px';
+                cardPlaceholder.style.height = rect.height + 'px';
+                card.parentNode.insertBefore(cardPlaceholder, card);
+
+                card.style.transition = 'none';
+                card.style.position = 'fixed';
+                card.style.top = rect.top + 'px';
+                card.style.left = rect.left + 'px';
+                card.style.width = rect.width + 'px';
+                card.style.height = rect.height + 'px';
+                card.style.zIndex = '1000000';
+
+                void card.offsetWidth;
+                card.style.transition = 'all 0.5s var(--ease-out-cubic)';
+                card.classList.add('is-expanded');
+                card.style.top = '0'; card.style.left = '0';
+                card.style.width = '100vw'; card.style.height = '100vh';
+
+                setTimeout(() => { isAnimating = false; }, 500);
+            }
+        }
+
+        let currentLang = 'ru';
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = { ru: { bio: `<p>Technical Developer</p><p>— От кастомных плагинов и сайтов до комплексной архитектуры игровых серверов.</p><div class="spacer"></div><p>30+ реализованных проектов.</p><p>4 года опыта в разработке для Minecraft.</p><p>Java | Spigot/Paper | Web-технологии</p>`, extra: `<div class="spacer"></div><p></p><div class="spacer">Photoshop |Java | HTML/CSS | JavaScript | SQL | Docker</div><p>Создаю комплексные решения для игровых проектов.</p><p>Пишите в ЛС — обсудим детали.</p>`, talk: "Обсуждение проекта", loc: "/ Москва" }, eng: { bio: `<p>Technical Developer</p><p>— From custom plugins and websites to complex game server architecture.</p><div class="spacer"></div><p>30+ completed projects.</p><p>4 years of experience in development for Minecraft.</p><p>Java | Spigot/Paper | Web technologies</p>`, extra: `<div class="spacer"></div><p>Skills: Photoshop | Java | HTML/CSS | JavaScript | SQL | Docker</p><div class="spacer"></div><p>I create comprehensive solutions for gaming projects.</p><p>Write to me in PM— we'll discuss the details.</p>`, talk: "Product discussion", loc: "/Moscow" } };
+            document.getElementById('bio-text').innerHTML = t[lang].bio;
+            document.getElementById('extra-content').innerHTML = t[lang].extra;
+            document.getElementById('talk-btn').textContent = t[lang].talk;
+            document.getElementById('location-text').textContent = t[lang].loc;
+            document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+            document.getElementById('btn-eng').classList.toggle('active', lang === 'eng');
+        }
+
+        function updateTime() {
+            const isEng = currentLang === 'eng';
+            const options = { timeZone: 'Europe/Minsk', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: isEng };
+            document.getElementById('time-display').textContent = new Intl.DateTimeFormat(isEng ? 'en-US' : 'ru-RU', options).format(new Date());
+        }
+        setInterval(updateTime, 1000); updateTime();
+
+        window.addEventListener('load', () => {
+            const avatar = document.getElementById('avatar-btn');
+            const preloader = document.getElementById("preloader");
+            const loaderElement = document.getElementById("load");
+            let i = 0;
+            avatar.addEventListener('click', (e) => { e.stopPropagation(); document.body.classList.toggle('light-mode'); });
+            document.getElementById('clock-btn').addEventListener('click', function() { this.classList.remove('flip-effect'); void this.offsetWidth; this.classList.add('flip-effect'); });
+            document.getElementById('expandable-cube').addEventListener('click', (e) => { if(e.target.tagName !== 'A') document.querySelector('.left-col').classList.toggle('expanded-mode'); });
+
+            const interval = setInterval(() => {
+                if (i <= 360) { loaderElement.style.background = `conic-gradient(#3a42acea ${i}deg, #e6e7eb 0deg)`; i += 5; } 
+                // Найди этот кусок в конце интервала:
+else {
+    clearInterval(interval);
+    preloader.classList.add('morph-animation');
+    document.body.classList.remove('no-scroll');
+    // Попробуй увеличить задержку здесь или добавить:
+    requestAnimationFrame(() => {
+        preloader.classList.add('preloader-hidden');
+    });
+    
+    setTimeout(() => document.getElementById("content").classList.add('content-visible'), 1150); // чуть позже
+}
+            }, 10);
+        });
+    </script>
+</body>
+</html>
