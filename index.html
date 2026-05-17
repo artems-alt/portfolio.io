@@ -247,6 +247,37 @@
 
         .work-card.is-expanded .work-cover { border-radius: 0; object-fit: contain !important; }
 
+        /* --- ОПИСАНИЕ КАРТОЧЕК --- */
+        .work-desc {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 30px 15px 15px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0) 100%);
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 500;
+            z-index: 3;
+            text-align: center;
+            transition: all var(--anim-duration) var(--ease-out-cubic);
+            pointer-events: none;
+        }
+
+        /* Анимация текста при наведении */
+        .work-card:not(.is-expanded):hover .work-desc {
+            padding-bottom: 20px;
+            color: var(--main-color);
+        }
+
+        /* Поведение текста при раскрытии карточки на весь экран */
+        .work-card.is-expanded .work-desc {
+            background: transparent;
+            font-size: 24px;
+            bottom: 5%;
+            color: #ffffff;
+        }
+
         /* --- ВЕРСТКА --- */
         .content-wrapper { position: relative; z-index: 2; display: flex; gap: var(--gap); padding: 0 15px 15px; margin-top: 15px; opacity: 0; transition: opacity 1s ease 0.5s; width: 100%; }
         .content-visible { opacity: 1; }
@@ -304,7 +335,7 @@
             <div class="card left-cube" id="expandable-cube">
                 <div id="bio-text">
                     <p>Technical Developer</p>
-                    <p>— От кастомных плагинов и сайтов до атмосферных карт и профисиональных Hub/lobby.</p>
+                    <p>— От кастомных плагинов и сайтов до атмосферных карт и профессиональных Hub/lobby.</p>
                     <div class="spacer"></div>
                     <p>71+ реализованных проектов.</p>
                     <p>4 года опыта в разработке для Minecraft.</p>
@@ -313,7 +344,7 @@
                 <div class="extra-text-wrapper">
                     <div class="extra-text" id="extra-content">
                         <div class="spacer"></div>
-                        <p>Photoshop |Java | HTML/CSS | JavaScript | SQL | Docker</p>
+                        <p>Photoshop | Java | HTML/CSS | JavaScript | SQL | Docker</p>
                         <div class="spacer"></div>
                         <p>Создаю комплексные решения для игровых проектов.</p>
                         <p>Пишите в ЛС — обсудим детали.</p>
@@ -322,7 +353,7 @@
             </div>
 
             <div class="bottom-group">
-                <div class="card talk-cube"><a href="https://funpay.com/lots/offer?id=66363804" target="_blank" id="talk-btn">Обсуждуние проекта</a></div>
+                <div class="card talk-cube"><a href="https://funpay.com/lots/offer?id=66363804" target="_blank" id="talk-btn">Обсуждение проекта</a></div>
                 <div class="card clock-cube" id="clock-btn">
                     <div class="clock-container"><span id="time-display">00:00:00</span><span style="opacity: 0.6; font-size: 0.9rem; margin-top: 4px;" id="location-text">/ Москва</span></div>
                 </div>
@@ -330,16 +361,56 @@
         </div>
 
         <div class="right-col">
-            <div class="card work-card" onclick="toggleCard(this)"><img src="img/covers1.png" class="work-cover" alt="c1"><div class="card-bg-clone"></div></div>
-            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover2.png" class="work-cover" alt="c2"><div class="card-bg-clone"></div></div>
-            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover3.png" class="work-cover" alt="c3"><div class="card-bg-clone"></div></div>
-            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover4.png" class="work-cover" alt="c4"><div class="card-bg-clone"></div></div>
-            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover5.png" class="work-cover" alt="c5"><div class="card-bg-clone"></div></div>
-            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover6.png" class="work-cover" alt="c6"><div class="card-bg-clone"></div></div>
-            <div class="card work-card" onclick="toggleCard(this)"><img src="img/covers7.png" class="work-cover" alt="c7"><div class="card-bg-clone"></div></div>
-            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover8.png" class="work-cover" alt="c8"><div class="card-bg-clone"></div></div>
-            <div class="card work-card" onclick="toggleCard(this)"><img src="img/covers9.png" class="work-cover" alt="c9"><div class="card-bg-clone"></div></div>
-            <div class="card work-card" onclick="toggleCard(this)"><img src="img/cover10.png" class="work-cover" alt="c10"><div class="card-bg-clone"></div></div>
+            <div class="card work-card" onclick="toggleCard(this)">
+                <img src="img/covers1.png" class="work-cover" alt="c1">
+                <div class="card-bg-clone"></div>
+                <div class="work-desc">Описание проекта 1</div>
+            </div>
+            <div class="card work-card" onclick="toggleCard(this)">
+                <img src="img/cover2.png" class="work-cover" alt="c2">
+                <div class="card-bg-clone"></div>
+                <div class="work-desc">Описание проекта 2</div>
+            </div>
+            <div class="card work-card" onclick="toggleCard(this)">
+                <img src="img/cover3.png" class="work-cover" alt="c3">
+                <div class="card-bg-clone"></div>
+                <div class="work-desc">Описание проекта 3</div>
+            </div>
+            <div class="card work-card" onclick="toggleCard(this)">
+                <img src="img/cover4.png" class="work-cover" alt="c4">
+                <div class="card-bg-clone"></div>
+                <div class="work-desc">Описание проекта 4</div>
+            </div>
+            <div class="card work-card" onclick="toggleCard(this)">
+                <img src="img/cover5.png" class="work-cover" alt="c5">
+                <div class="card-bg-clone"></div>
+                <div class="work-desc">Описание проекта 5</div>
+            </div>
+            <div class="card work-card" onclick="toggleCard(this)">
+                <img src="img/cover6.png" class="work-cover" alt="c6">
+                <div class="card-bg-clone"></div>
+                <div class="work-desc">Описание проекта 6</div>
+            </div>
+            <div class="card work-card" onclick="toggleCard(this)">
+                <img src="img/covers7.png" class="work-cover" alt="c7">
+                <div class="card-bg-clone"></div>
+                <div class="work-desc">Описание проекта 7</div>
+            </div>
+            <div class="card work-card" onclick="toggleCard(this)">
+                <img src="img/cover8.png" class="work-cover" alt="c8">
+                <div class="card-bg-clone"></div>
+                <div class="work-desc">Описание проекта 8</div>
+            </div>
+            <div class="card work-card" onclick="toggleCard(this)">
+                <img src="img/covers9.png" class="work-cover" alt="c9">
+                <div class="card-bg-clone"></div>
+                <div class="work-desc">Описание проекта 9</div>
+            </div>
+            <div class="card work-card" onclick="toggleCard(this)">
+                <img src="img/cover10.png" class="work-cover" alt="c10">
+                <div class="card-bg-clone"></div>
+                <div class="work-desc">Описание проекта 10</div>
+            </div>
         </div>
     </div>
 
@@ -413,7 +484,20 @@
         let currentLang = 'ru';
         function setLanguage(lang) {
             currentLang = lang;
-            const t = { ru: { bio: `<p>Technical Developer</p><p>— От кастомных плагинов и сайтов до комплексной архитектуры игровых серверов.</p><div class="spacer"></div><p>30+ реализованных проектов.</p><p>4 года опыта в разработке для Minecraft.</p><p>Java | Spigot/Paper | Web-технологии</p>`, extra: `<div class="spacer"></div><p></p><div class="spacer">Photoshop |Java | HTML/CSS | JavaScript | SQL | Docker</div><p>Создаю комплексные решения для игровых проектов.</p><p>Пишите в ЛС — обсудим детали.</p>`, talk: "Обсуждение проекта", loc: "/ Москва" }, eng: { bio: `<p>Technical Developer</p><p>— From custom plugins and websites to complex game server architecture.</p><div class="spacer"></div><p>30+ completed projects.</p><p>4 years of experience in development for Minecraft.</p><p>Java | Spigot/Paper | Web technologies</p>`, extra: `<div class="spacer"></div><p>Skills: Photoshop | Java | HTML/CSS | JavaScript | SQL | Docker</p><div class="spacer"></div><p>I create comprehensive solutions for gaming projects.</p><p>Write to me in PM— we'll discuss the details.</p>`, talk: "Product discussion", loc: "/Moscow" } };
+            const t = { 
+                ru: { 
+                    bio: `<p>Technical Developer</p><p>— От кастомных плагинов и сайтов до атмосферных карт и профессиональных Hub/lobby.</p><div class="spacer"></div><p>71+ реализованных проектов.</p><p>4 года опыта в разработке для Minecraft.</p><p>Java | Spigot/Paper | Web-технологии</p>`, 
+                    extra: `<div class="spacer"></div><p>Photoshop | Java | HTML/CSS | JavaScript | SQL | Docker</p><div class="spacer"></div><p>Создаю комплексные решения для игровых проектов.</p><p>Пишите в ЛС — обсудим детали.</p>`, 
+                    talk: "Обсуждение проекта", 
+                    loc: "/ Москва" 
+                }, 
+                eng: { 
+                    bio: `<p>Technical Developer</p><p>— From custom plugins and websites to atmospheric maps and professional Hub/lobby.</p><div class="spacer"></div><p>71+ completed projects.</p><p>4 years of experience in Minecraft development.</p><p>Java | Spigot/Paper | Web-technologies</p>`, 
+                    extra: `<div class="spacer"></div><p>Photoshop | Java | HTML/CSS | JavaScript | SQL | Docker</p><div class="spacer"></div><p>I create comprehensive solutions for gaming projects.</p><p>DM me — let's discuss the details.</p>`, 
+                    talk: "Project discussion", 
+                    loc: "/ Moscow" 
+                } 
+            };
             document.getElementById('bio-text').innerHTML = t[lang].bio;
             document.getElementById('extra-content').innerHTML = t[lang].extra;
             document.getElementById('talk-btn').textContent = t[lang].talk;
@@ -440,18 +524,16 @@
 
             const interval = setInterval(() => {
                 if (i <= 360) { loaderElement.style.background = `conic-gradient(#3a42acea ${i}deg, #e6e7eb 0deg)`; i += 5; } 
-                // Найди этот кусок в конце интервала:
-else {
-    clearInterval(interval);
-    preloader.classList.add('morph-animation');
-    document.body.classList.remove('no-scroll');
-    // Попробуй увеличить задержку здесь или добавить:
-    requestAnimationFrame(() => {
-        preloader.classList.add('preloader-hidden');
-    });
-    
-    setTimeout(() => document.getElementById("content").classList.add('content-visible'), 1150); // чуть позже
-}
+                else {
+                    clearInterval(interval);
+                    preloader.classList.add('morph-animation');
+                    document.body.classList.remove('no-scroll');
+                    requestAnimationFrame(() => {
+                        preloader.classList.add('preloader-hidden');
+                    });
+                    
+                    setTimeout(() => document.getElementById("content").classList.add('content-visible'), 1150);
+                }
             }, 10);
         });
     </script>
