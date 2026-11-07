@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luminarys — Portfolio</title>
+    <style>
+        @font-face {
+            font-family: 'ScienceGothic';
+            src: url('./fonts/science-gothic.ttf') format('truetype');
+            font-weight: 100 900;
+            font-display: swap;
+        }
+
+        :root {
+            --bg: #070707;
+            --card: rgba(18, 18, 18, 0.75);
+            --card-solid: #121212;
+            --text: #f5f5f5;
+            --muted: rgba(255, 255, 255, 0.55);
+            --accent: #7eb8ff;
+            --accent-soft: rgba(126, 184, 255, 0.16);
+            --border: rgba(255, 255, 255, 0.08);
+            --hover: #ffffff;
+            --radius: 12px;
+            --gap: 12px;
+            --ease: cubic-bezier(0.22, 1, 0.36, 1);
+            --logo-size: 140px;
+        }
+
+        body.light {
+            --bg: #f4f4f6;
+            --card: rgba(255, 255, 255, 0.88);
+            --card-solid: #ffffff;
+            --text: #111;
+            --muted: rgba(0, 0, 0, 0.5);
+            --accent: #3d4fd6;
+            --accent-soft: rgba(61, 79, 214, 0.12);
+            --border: rgba(0, 0, 0, 0.08);
+            --hover: #000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scrollbar-width: none;
+        }
+
+        body {
+            font-family: 'ScienceGothic', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        body.no-scroll {
+            overflow: hidden;
+        }
+
+        #grid-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        #ambient-snow {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* ===== PRELOADER — winter ===== */
+        #preloader {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(100, 160, 255, 0.18), transparent 55%),
+                radial-gradient(ellipse 60% 40% at 50% 100%, rgba(80, 120, 200, 0.1), transparent 50%),
+                #03060c;
+            transition: opacity 0.7s ease, visibility 0.7s;
+            overflow: hidden;
+        }
+
+        #preloader.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        #snow-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .preloader-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .preloader-ring {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preloader-ring::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: conic-gradient(#a8d4ff var(--p, 0deg), rgba(255, 255, 255, 0.06) 0deg);
+            filter: drop-shadow(0 0 12px rgba(168, 212, 255, 0.35));
+        }
+
+        .preloader-ring::after {
+            content: '';
+            position: absolute;
+            inset: 7px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, #0c1524, #03060c 70%);
+            border: 1px solid rgba(168, 212, 255, 0.08);
+        }
+
+        .preloader-logo {
+            position: relative;
+            z-index: 2;
+            width: 118px;
+            height: 118px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow:
+                0 0 0 2px rgba(168, 212, 255, 0.15),
+                0 0 50px rgba(140, 190, 255, 0.35);
+        }
+
+        .preloader-text {
+            font-size: 0.8rem;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: rgba(200, 225, 255, 0.55);
+            font-weight: 500;
+        }
+
+        .preloader-bar {
+            width: 180px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .preloader-bar>i {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #5a9fe8, #c8e6ff);
+            border-radius: 4px;
+            box-shadow: 0 0 12px rgba(168, 212, 255, 0.6);
+            transition: width 0.08s linear;
+        }
+
+        .preloader-sparkles {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0;
+            animation: twinkle var(--dur, 3s) ease-in-out infinite;
+            animation-delay: var(--delay, 0s);
+            box-shadow: 0 0 6px rgba(200, 230, 255, 0.9);
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0;
+                transform: scale(0.4);
+            }
+
+            50% {
+                opacity: 0.9;
+                transform: scale(1);
+            }
+        }
+
+        /* ===== LAYOUT ===== */
+        .wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 14px;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.5s ease, transform 0.5s var(--ease);
+        }
+
+        .wrap.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: var(--gap);
+            align-items: start;
+            min-height: calc(100vh - 28px);
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: calc(100vh - 28px);
+            justify-content: center;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(16px);
+            transition: background 0.3s, border-color 0.3s, color 0.3s;
+        }
+
+        /* Top: logo + name + lang */
+        .top-bar {
+            display: grid;
+            grid-template-columns: var(--logo-size) 1fr;
+            gap: var(--gap);
+        }
+
+        .logo-btn {
+            width: var(--logo-size);
+            height: var(--logo-size);
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            padding: 0;
+            background: var(--card-solid);
+            flex-shrink: 0;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        .logo-btn:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 22px rgba(126, 184, 255, 0.28);
+        }
+
+        .logo-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .name-block {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .name-link {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.55rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: inherit;
+            letter-spacing: 0.02em;
+            min-height: 64px;
+        }
+
+        .name-link:hover {
+            background: var(--hover);
+            color: var(--bg);
+        }
+
+        .lang-row {
+            display: flex;
+            gap: 8px;
+            height: 48px;
+        }
+
+        .lang-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: transparent;
+            color: var(--muted);
+            transition: all 0.25s;
+        }
+
+        .lang-btn:hover {
+            color: var(--text);
+            border-color: var(--text);
+        }
+
+        .lang-btn.active {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        /* Bio — compact, no forced tall empty area */
+        .bio {
+            padding: 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .bio .label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .bio p {
+            font-size: 1.15rem;
+            line-height: 1.55;
+            color: var(--muted);
+        }
+
+        .bio p strong {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .bio .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .bio .tag {
+            font-size: 0.9rem;
+            padding: 6px 14px;
+            border-radius: 100px;
+            background: var(--accent-soft);
+            color: var(--text);
+        }
+
+        .extra {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.45s var(--ease), opacity 0.35s ease, margin 0.35s;
+        }
+
+        .bio.open .extra {
+            max-height: 280px;
+            opacity: 1;
+            margin-top: 8px;
+        }
+
+        .bio .hint {
+            font-size: 0.95rem;
+            color: var(--muted);
+            opacity: 0.65;
+            margin-top: 6px;
+        }
+
+        .cta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 64px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: inherit;
+            border-radius: var(--radius);
+            transition: all 0.3s;
+        }
+
+        .cta:hover {
+            background: var(--accent) !important;
+            border-color: var(--accent) !important;
+            color: #fff !important;
+        }
+
+        .clock {
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .clock .time {
+            font-size: 1.7rem;
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .clock .loc {
+            font-size: 1rem;
+            color: var(--muted);
+        }
+
+        .clock.flip {
+            animation: flip 0.55s ease;
+        }
+
+        @keyframes flip {
+            0% {
+                transform: perspective(600px) rotateX(0);
+            }
+
+            50% {
+                transform: perspective(600px) rotateX(90deg);
+                background: var(--hover);
+                color: var(--bg);
+            }
+
+            100% {
+                transform: perspective(600px) rotateX(0);
+            }
+        }
+
+        /* Projects — larger cards */
+        .projects {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 16px;
+            align-content: start;
+        }
+
+        .project {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: var(--radius);
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--card-solid);
+            transition: transform 0.3s var(--ease), border-color 0.25s;
+        }
+
+        .project:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.22);
+        }
+
+        body.light .project:hover {
+            border-color: rgba(0, 0, 0, 0.18);
+        }
+
+        .project img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s var(--ease);
+        }
+
+        .project:hover img {
+            transform: scale(1.04);
+        }
+
+        .project .overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.15) 50%, transparent 70%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 16px;
+        }
+
+        .project .title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            line-height: 1.25;
+            margin-bottom: 4px;
+        }
+
+        .project .meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+        }
+
+        .project .price {
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.72);
+            font-weight: 500;
+        }
+
+        .project .count {
+            font-size: 0.68rem;
+            padding: 2px 7px;
+            border-radius: 100px;
+            background: rgba(255, 255, 255, 0.14);
+            color: #fff;
+            backdrop-filter: blur(8px);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.35s ease, visibility 0.35s;
+        }
+
+        .modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.78);
+            backdrop-filter: blur(12px);
+        }
+
+        .modal-panel {
+            position: relative;
+            width: min(1100px, 94vw);
+            height: min(720px, 90vh);
+            background: var(--card-solid);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            overflow: hidden;
+            transform: scale(0.96) translateY(12px);
+            transition: transform 0.4s var(--ease);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal.open .modal-panel {
+            transform: scale(1) translateY(0);
+        }
+
+        .gallery {
+            position: relative;
+            background: #0a0a0a;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .gallery-track {
+            display: flex;
+            height: 100%;
+            transition: transform 0.45s var(--ease);
+        }
+
+        .gallery-slide {
+            min-width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .gallery-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+        }
+
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.45);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            backdrop-filter: blur(8px);
+            z-index: 5;
+        }
+
+        .gallery-nav:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .gallery-nav.prev {
+            left: 14px;
+        }
+
+        .gallery-nav.next {
+            right: 14px;
+        }
+
+        .gallery-nav svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .gallery-dots {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 5;
+        }
+
+        .gallery-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            cursor: pointer;
+            transition: all 0.25s;
+            padding: 0;
+        }
+
+        .gallery-dot.active {
+            background: #fff;
+            transform: scale(1.25);
+        }
+
+        .gallery-counter {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            background: rgba(0, 0, 0, 0.4);
+            padding: 6px 12px;
+            border-radius: 100px;
+            backdrop-filter: blur(8px);
+            z-index: 5;
+        }
+
+        .gallery-thumbs {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 5;
+            max-width: 90%;
+            overflow-x: auto;
+            padding: 4px;
+            scrollbar-width: none;
+        }
+
+        .gallery-thumbs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .gallery-thumb {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid transparent;
+            cursor: pointer;
+            opacity: 0.55;
+            transition: all 0.25s;
+            flex-shrink: 0;
+        }
+
+        .gallery-thumb:hover {
+            opacity: 0.85;
+        }
+
+        .gallery-thumb.active {
+            border-color: #fff;
+            opacity: 1;
+        }
+
+        .info {
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            gap: 16px;
+        }
+
+        .info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .info h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        .close-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background: var(--hover);
+            color: var(--bg);
+            border-color: var(--hover);
+        }
+
+        .close-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .price-badge {
+            display: inline-flex;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+            background: var(--accent-soft);
+            padding: 7px 12px;
+            border-radius: 10px;
+            width: fit-content;
+        }
+
+        .info-desc {
+            font-size: 0.92rem;
+            line-height: 1.6;
+            color: var(--muted);
+        }
+
+        .info-desc p+p {
+            margin-top: 10px;
+        }
+
+        .info-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .info-tag {
+            font-size: 0.72rem;
+            padding: 4px 11px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        .info-footer {
+            margin-top: auto;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+
+        .info-cta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 46px;
+            background: var(--accent);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .info-cta:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 960px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: relative;
+                top: 0;
+            }
+
+            .modal-panel {
+                grid-template-columns: 1fr;
+                height: min(860px, 92vh);
+                width: min(520px, 94vw);
+            }
+
+            .gallery {
+                min-height: 260px;
+                max-height: 42vh;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .projects {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            :root {
+                --logo-size: 100px;
+            }
+
+            .info {
+                padding: 20px 16px;
+            }
+
+            .info h2 {
+                font-size: 1.15rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="no-scroll">
+    <canvas id="grid-canvas"></canvas>
+    <canvas id="ambient-snow"></canvas>
+
+    <!-- Preloader — winter -->
+    <div id="preloader">
+        <canvas id="snow-canvas"></canvas>
+        <div class="preloader-sparkles" id="preloader-sparkles"></div>
+        <div class="preloader-content">
+            <div class="preloader-ring" id="preloader-ring">
+                <img src="logo.jpg" alt="Logo" class="preloader-logo">
+            </div>
+            <div class="preloader-bar"><i id="preloader-fill"></i></div>
+            <div class="preloader-text" id="preloader-text">Loading</div>
+        </div>
+    </div>
+
+    <div class="wrap" id="content">
+        <div class="layout">
+            <aside class="sidebar">
+                <div class="top-bar">
+                    <button class="logo-btn" id="avatar-btn" title="Тема">
+                        <img src="logo.jpg" alt="Avatar">
+                    </button>
+                    <div class="name-block">
+                        <a href="https://funpay.com/users/15227343/" target="_blank"
+                            class="card name-link">Luminarys</a>
+                        <div class="lang-row">
+                            <button class="lang-btn active" id="btn-ru" onclick="setLang('ru')">RU</button>
+                            <button class="lang-btn" id="btn-eng" onclick="setLang('eng')">ENG</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bio" id="bio-card">
+                    <span class="label" id="bio-label">О себе</span>
+                    <div id="bio-main"></div>
+                    <div class="extra" id="bio-extra"></div>
+                    <span class="hint" id="bio-hint">Нажмите, чтобы раскрыть</span>
+                </div>
+
+                <a href="https://funpay.com/lots/offer?id=70398134" target="_blank" class="card cta"
+                    id="cta-btn">Обсудить проект</a>
+
+                <div class="card clock" id="clock">
+                    <span class="time" id="time">00:00:00</span>
+                    <span class="loc" id="loc">/ Москва</span>
+                </div>
+            </aside>
+
+            <main class="projects" id="projects-grid"></main>
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+        <div class="modal-panel">
+            <div class="gallery" id="gallery">
+                <div class="gallery-track" id="gallery-track"></div>
+                <button class="gallery-nav prev" id="gal-prev" aria-label="Previous">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                </button>
+                <button class="gallery-nav next" id="gal-next" aria-label="Next">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18l6-6-6-6" />
+                    </svg>
+                </button>
+                <div class="gallery-thumbs" id="gallery-thumbs"></div>
+                <div class="gallery-dots" id="gallery-dots"></div>
+                <div class="gallery-counter" id="gallery-counter">1 / 1</div>
+            </div>
+            <div class="info">
+                <div class="info-header">
+                    <h2 id="modal-title"></h2>
+                    <button class="close-btn" id="modal-close" aria-label="Close">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="price-badge" id="modal-price"></div>
+                <div class="info-desc" id="modal-desc"></div>
+                <div class="info-tags" id="modal-tags"></div>
+                <div class="info-footer">
+                    <a href="https://funpay.com/lots/offer?id=70398134" target="_blank" class="info-cta"
+                        id="modal-cta">Обсудить этот проект</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ========== INTERACTIVE GRID ========== */
+        const canvas = document.getElementById('grid-canvas');
+        const ctx = canvas.getContext('2d');
+        let mouse = { x: -9999, y: -9999 };
+        let targetMouse = { x: -9999, y: -9999 };
+        let w = 0, h = 0, dpr = 1;
+        const CELL = 48;
+        const INFLUENCE = 180;
+        const MAX_PUSH = 14;
+
+        function resizeCanvas() {
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            w = window.innerWidth;
+            h = window.innerHeight;
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+            canvas.style.width = w + 'px';
+            canvas.style.height = h + 'px';
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        function isLight() {
+            return document.body.classList.contains('light');
+        }
+
+        function drawGrid() {
+            mouse.x += (targetMouse.x - mouse.x) * 0.12;
+            mouse.y += (targetMouse.y - mouse.y) * 0.12;
+            ctx.clearRect(0, 0, w, h);
+
+            if (mouse.x > -1000) {
+                const g = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, INFLUENCE * 1.4);
+                if (isLight()) {
+                    g.addColorStop(0, 'rgba(126, 184, 255, 0.08)');
+                    g.addColorStop(1, 'rgba(91, 108, 255, 0)');
+                } else {
+                    g.addColorStop(0, 'rgba(126, 184, 255, 0.14)');
+                    g.addColorStop(1, 'rgba(91, 108, 255, 0)');
+                }
+                ctx.fillStyle = g;
+                ctx.fillRect(0, 0, w, h);
+            }
+
+            const lineColor = isLight() ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.055)';
+            const cols = Math.ceil(w / CELL) + 2;
+            const rows = Math.ceil(h / CELL) + 2;
+            const offsetX = (w % CELL) / 2;
+            const offsetY = (h % CELL) / 2;
+
+            const pts = [];
+            for (let j = 0; j <= rows; j++) {
+                pts[j] = [];
+                for (let i = 0; i <= cols; i++) {
+                    let x = offsetX + i * CELL - CELL;
+                    let y = offsetY + j * CELL - CELL;
+                    const dx = x - mouse.x;
+                    const dy = y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < INFLUENCE && dist > 0.1) {
+                        const force = (1 - dist / INFLUENCE);
+                        const push = force * force * MAX_PUSH;
+                        x += (dx / dist) * push;
+                        y += (dy / dist) * push;
+                    }
+                    pts[j][i] = { x, y, dist };
+                }
+            }
+
+            for (let j = 0; j <= rows; j++) {
+                ctx.beginPath();
+                for (let i = 0; i <= cols; i++) {
+                    const p = pts[j][i];
+                    if (i === 0) ctx.moveTo(p.x, p.y);
+                    else ctx.lineTo(p.x, p.y);
+                }
+                ctx.strokeStyle = lineColor;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+            for (let i = 0; i <= cols; i++) {
+                ctx.beginPath();
+                for (let j = 0; j <= rows; j++) {
+                    const p = pts[j][i];
+                    if (j === 0) ctx.moveTo(p.x, p.y);
+                    else ctx.lineTo(p.x, p.y);
+                }
+                ctx.strokeStyle = lineColor;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+
+            if (mouse.x > -1000) {
+                for (let j = 0; j <= rows; j++) {
+                    for (let i = 0; i <= cols; i++) {
+                        const p = pts[j][i];
+                        if (p.dist < INFLUENCE) {
+                            const alpha = (1 - p.dist / INFLUENCE);
+                            const size = 1.2 + alpha * 2.5;
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+                            ctx.fillStyle = isLight()
+                                ? `rgba(100,150,220,${0.15 + alpha * 0.45})`
+                                : `rgba(160,210,255,${0.2 + alpha * 0.55})`;
+                            ctx.fill();
+                        }
+                    }
+                }
+            }
+            requestAnimationFrame(drawGrid);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('mousemove', e => {
+            targetMouse.x = e.clientX;
+            targetMouse.y = e.clientY;
+        });
+        window.addEventListener('mouseleave', () => {
+            targetMouse.x = -9999;
+            targetMouse.y = -9999;
+        });
+        resizeCanvas();
+        requestAnimationFrame(drawGrid);
+
+        /* Ambient winter snow on main page (realistic, subtle) */
+        (function ambientSnow() {
+            const c = document.getElementById('ambient-snow');
+            if (!c) return;
+            const cx = c.getContext('2d');
+            let aw = 0, ah = 0, adpr = 1;
+            const flakes = [];
+            const N = 70;
+            let wind = 0, windTarget = 0;
+            let lastT = performance.now();
+
+            function resize() {
+                adpr = Math.min(window.devicePixelRatio || 1, 2);
+                aw = window.innerWidth;
+                ah = window.innerHeight;
+                c.width = aw * adpr;
+                c.height = ah * adpr;
+                c.style.width = aw + 'px';
+                c.style.height = ah + 'px';
+                cx.setTransform(adpr, 0, 0, adpr, 0, 0);
+            }
+            function make(yRand) {
+                const layer = Math.random() < 0.55 ? 0 : (Math.random() < 0.7 ? 1 : 2);
+                const ls = [0.5, 0.9, 1.3][layer];
+                return {
+                    x: Math.random() * (aw + 30) - 15,
+                    y: yRand ? Math.random() * ah : -12 - Math.random() * 40,
+                    r: (0.4 + Math.random() * 1.4) * ls,
+                    layer,
+                    sp: (0.2 + Math.random() * 0.55) * (0.75 + layer * 0.35),
+                    swayAmp: (0.25 + Math.random() * 0.9) * (0.5 + layer * 0.3),
+                    swaySpeed: 0.007 + Math.random() * 0.018,
+                    swayPhase: Math.random() * Math.PI * 2,
+                    rot: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.02,
+                    op: [0.12, 0.22, 0.38][layer] + Math.random() * 0.1,
+                    crystal: layer === 2 && Math.random() > 0.55
+                };
+            }
+            function drawCrystal(x, y, r, rot, alpha) {
+                cx.save();
+                cx.translate(x, y);
+                cx.rotate(rot);
+                cx.strokeStyle = `rgba(230, 242, 255, ${alpha})`;
+                cx.lineWidth = Math.max(0.5, r * 0.16);
+                cx.lineCap = 'round';
+                for (let i = 0; i < 6; i++) {
+                    cx.rotate(Math.PI / 3);
+                    cx.beginPath();
+                    cx.moveTo(0, 0);
+                    cx.lineTo(0, -r);
+                    const b = r * 0.4;
+                    cx.moveTo(0, -r * 0.55);
+                    cx.lineTo(-b * 0.3, -r * 0.55 - b * 0.22);
+                    cx.moveTo(0, -r * 0.55);
+                    cx.lineTo(b * 0.3, -r * 0.55 - b * 0.22);
+                    cx.stroke();
+                }
+                cx.restore();
+            }
+            function init() {
+                flakes.length = 0;
+                for (let i = 0; i < N; i++) flakes.push(make(true));
+            }
+            function frame(now) {
+                const dt = Math.min(32, now - lastT) / 16.67;
+                lastT = now;
+                if (Math.random() < 0.004) windTarget = (Math.random() - 0.5) * 1.2;
+                wind += (windTarget - wind) * 0.006 * dt;
+
+                cx.clearRect(0, 0, aw, ah);
+                const light = document.body.classList.contains('light');
+
+                for (let layer = 0; layer <= 2; layer++) {
+                    for (const f of flakes) {
+                        if (f.layer !== layer) continue;
+                        f.swayPhase += f.swaySpeed * dt;
+                        f.rot += f.rotSpeed * dt;
+                        const sway = Math.sin(f.swayPhase) * f.swayAmp;
+                        f.x += (sway * 0.12 + wind * (0.4 + f.layer * 0.3)) * dt;
+                        f.y += f.sp * dt;
+                        if (f.y > ah + 16) { Object.assign(f, make(false)); f.y = -12; }
+                        if (f.x < -24) f.x = aw + 16;
+                        if (f.x > aw + 24) f.x = -16;
+
+                        const alpha = light ? f.op * 0.55 : f.op;
+                        if (f.crystal && f.r > 1.2) {
+                            drawCrystal(f.x, f.y, f.r * 2, f.rot, alpha);
+                        } else {
+                            const g = cx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r * 2.2);
+                            if (light) {
+                                g.addColorStop(0, `rgba(120, 160, 210, ${alpha})`);
+                                g.addColorStop(1, 'rgba(120, 160, 210, 0)');
+                            } else {
+                                g.addColorStop(0, `rgba(235, 245, 255, ${alpha})`);
+                                g.addColorStop(0.5, `rgba(200, 225, 255, ${alpha * 0.35})`);
+                                g.addColorStop(1, 'rgba(180, 210, 255, 0)');
+                            }
+                            cx.beginPath();
+                            cx.arc(f.x, f.y, f.r * 2.2, 0, Math.PI * 2);
+                            cx.fillStyle = g;
+                            cx.fill();
+                        }
+                    }
+                }
+                requestAnimationFrame(frame);
+            }
+            resize();
+            init();
+            requestAnimationFrame(frame);
+            window.addEventListener('resize', () => { resize(); init(); });
+        })();
+
+        /* ========== PROJECT DATA ==========
+           images: ['фото1', 'фото2', ...] — можно добавлять сколько угодно.
+           Пока у каждого 1 фото; галерея/бейдж появятся сами, когда photos > 1.
+        ========== */
+        const PROJECTS = [
+            {
+                id: 1,
+                images: ['img/1.png'],
+                price: 730,
+                tags: ['Hub', 'Japanese', 'Lobby'],
+                ru: {
+                    title: 'Хаб в японском стиле',
+                    desc: '<p>Тёплый восточный хаб с сакурой, фонарями и спокойной атмосферой. Архитектура выдержана в японском стиле: мягкий свет, аккуратные детали и удобная навигация для игроков.</p><p>Отлично смотрится как главное лобби сервера или зона отдыха с азиатским вайбом.</p>'
+                },
+                eng: {
+                    title: 'Japanese Style Hub',
+                    desc: '<p>A warm eastern hub with sakura, lanterns and a calm atmosphere. Architecture is kept in a Japanese style: soft light, neat details and comfortable navigation for players.</p><p>Looks great as a main server lobby or a relaxation zone with an Asian vibe.</p>'
+                }
+            },
+            {
+                id: 2,
+                images: ['img/2.png'],
+                price: 900,
+                tags: ['Hub', 'Medieval', 'Lobby'],
+                ru: {
+                    title: 'Хаб в средневековом стиле',
+                    desc: '<p>Каменные стены, башни и ощущение настоящего замкового двора. Средневековый хаб с продуманной планировкой и сильной атмосферой фэнтези.</p><p>Идеален для RPG и survival-серверов, где важен первый взгляд игрока на мир.</p>'
+                },
+                eng: {
+                    title: 'Medieval Style Hub',
+                    desc: '<p>Stone walls, towers and the feeling of a real castle courtyard. A medieval hub with thoughtful layout and a strong fantasy atmosphere.</p><p>Ideal for RPG and survival servers where a player\'s first impression of the world matters.</p>'
+                }
+            },
+            {
+                id: 3,
+                images: ['img/3.png'],
+                price: 400,
+                tags: ['Map', 'Cinematic', 'Atmosphere'],
+                ru: {
+                    title: 'Атмосферная карта для съёмок',
+                    desc: '<p>Карта, собранная специально под видео и кинематографичные кадры. Акцент на ракурсах, свете и композиции — чтобы сцена выглядела дорого даже в коротком ролике.</p><p>Подходит для трейлеров, YouTube-контента и атмосферных вставок.</p>'
+                },
+                eng: {
+                    title: 'Atmospheric Map for Filming',
+                    desc: '<p>A map built specifically for video and cinematic shots. Focus on angles, lighting and composition — so every scene looks premium even in a short clip.</p><p>Great for trailers, YouTube content and atmospheric cutaways.</p>'
+                }
+            },
+            {
+                id: 4,
+                images: ['img/4.png'],
+                price: 1700,
+                tags: ['Hub', 'Historical', 'XVI century'],
+                ru: {
+                    title: 'Хаб конца XVI века',
+                    desc: '<p>Исторический хаб в духе позднего Ренессанса: богатая детализация, выразительные формы и «дорогой» внешний вид. Выглядит как отдельная эпоха, а не просто набор блоков.</p><p>Для серверов, которым нужно запоминающееся и стильное лобби.</p>'
+                },
+                eng: {
+                    title: 'Late 16th Century Hub',
+                    desc: '<p>A historical hub in the spirit of the late Renaissance: rich detailing, expressive forms and a premium look. Feels like its own era, not just a pile of blocks.</p><p>For servers that need a memorable and stylish lobby.</p>'
+                }
+            },
+            {
+                id: 5,
+                images: ['img/image5.png'],
+                price: 3500,
+                tags: ['Spawn', 'RPG', 'Medieval'],
+                ru: {
+                    title: 'Спавн RPG в средневековом стиле',
+                    desc: '<p>Крупный средневековый спавн для RPG: зоны под NPC, квесты и торговлю, продуманные маршруты и сильная атмосфера старта. Игрок сразу чувствует масштаб мира.</p><p>Один из самых детализированных проектов — полноценная стартовая локация «под ключ».</p>'
+                },
+                eng: {
+                    title: 'Medieval RPG Spawn',
+                    desc: '<p>A large medieval spawn for RPG servers: zones for NPCs, quests and trading, clear routes and a strong starting atmosphere. Players immediately feel the scale of the world.</p><p>One of the most detailed projects — a complete turnkey starting location.</p>'
+                }
+            },
+            {
+                id: 6,
+                images: ['img/6.png'],
+                price: 800,
+                tags: ['Lobby', 'Chinese', 'Asian'],
+                ru: {
+                    title: 'Лобби в китайском стиле',
+                    desc: '<p>Элегантное лобби с китайской эстетикой: пагоды, красные акценты, традиционные мотивы и спокойный ритм пространства. Выглядит цельно и узнаваемо.</p><p>Хороший выбор для азиатской тематики сервера или отдельного ивент-пространства.</p>'
+                },
+                eng: {
+                    title: 'Chinese Style Lobby',
+                    desc: '<p>An elegant lobby with Chinese aesthetics: pagodas, red accents, traditional motifs and a calm sense of space. Feels cohesive and instantly recognizable.</p><p>A strong choice for an Asian-themed server or a dedicated event area.</p>'
+                }
+            },
+            {
+                id: 7,
+                images: ['img/7.png'],
+                price: 500,
+                tags: ['Build', 'Japanese', 'Cinematic'],
+                ru: {
+                    title: 'Японский замок для сериала',
+                    desc: '<p>Постройка японского замка, заточенная под съёмки: выразительные ракурсы, силуэт и атмосфера, которые хорошо читаются в кадре.</p><p>Можно использовать как локацию для контента или как часть большой карты сервера.</p>'
+                },
+                eng: {
+                    title: 'Japanese Castle for a Series',
+                    desc: '<p>A Japanese castle build made with filming in mind: strong angles, silhouette and atmosphere that read clearly on camera.</p><p>Can be used as a content location or as part of a larger server map.</p>'
+                }
+            },
+            {
+                id: 8,
+                images: ['img/imag8.png'],
+                price: 1399,
+                tags: ['Lobby', 'Custom', 'Studio'],
+                ru: {
+                    title: 'Лобби для BlockLabStudio',
+                    desc: '<p>Кастомное лобби под бренд BlockLabStudio: свой характер, логика перемещения и запоминающийся визуальный стиль. Собран с учётом задач студии.</p><p>Пример работы «под ключ» — от идеи до готового результата.</p>'
+                },
+                eng: {
+                    title: 'Lobby for BlockLabStudio',
+                    desc: '<p>A custom lobby for the BlockLabStudio brand: its own character, clear movement logic and a memorable visual style. Built around the studio\'s needs.</p><p>An example of a turnkey project — from idea to finished result.</p>'
+                }
+            },
+            {
+                id: 9,
+                images: ['img/9.jpg'],
+                price: 1499,
+                tags: ['Spawn', 'Winter', 'Lobby'],
+                ru: {
+                    title: 'Зимний спавн',
+                    desc: '<p>Снежный спавн с зимней атмосферой: холодный свет, сугробы и уютные постройки. Игрок сразу попадает в морозный, но живой мир.</p><p>Хорошо смотрится как стартовая точка сезонного сервера или новогоднего ивента.</p>'
+                },
+                eng: {
+                    title: 'Winter Spawn',
+                    desc: '<p>A snowy spawn with a winter atmosphere: cold light, snowdrifts and cozy builds. Players step into a frosty but lively world right away.</p><p>Works great as a starting point for a seasonal server or a New Year event.</p>'
+                }
+            },
+            {
+                id: 10,
+                images: ['img/10.png'],
+                price: 500,
+                tags: ['Arena', 'Overworld', 'Minigame'],
+                ru: {
+                    title: 'Арена лесорубки — Обычный мир',
+                    desc: '<p>Парная версия арены «Лесорубка» в стиле обычного мира: природная палитра, деревья и привычный overworld-вайб. Хорошо контрастирует с эндер-вариантом.</p><p>Можно ставить отдельно или вместе с ареной Края.</p>'
+                },
+                eng: {
+                    title: 'Woodcutting Arena — Overworld',
+                    desc: '<p>A matching "Woodcutting" arena in Overworld style: natural palette, trees and a familiar overworld vibe. Contrasts nicely with the End version.</p><p>Works on its own or together with the End arena.</p>'
+                }
+            }
+        ];
+
+        let lang = 'ru';
+        let currentProject = null;
+        let slideIndex = 0;
+        let touchStartX = 0;
+
+        const i18n = {
+            ru: {
+                bioLabel: 'О себе',
+                bioMain: `<p><strong>Minecraft Developer</strong></p>
+                    <p>Делаю хабы, лобби, спавны и атмосферные карты — с акцентом на стиль, удобство и вайб сервера.</p>
+                    <p><strong>90+</strong> проектов · <strong>4 года</strong> в разработке</p>
+                    <div class="tags">
+                        <span class="tag">Java</span>
+                        <span class="tag">Spigot / Paper</span>
+                        <span class="tag">Web</span>
+                        <span class="tag">Axiom</span>
+                    </div>`,
+                bioExtra: `<p>Также: плагины, сайты, Photoshop, HTML/CSS, JavaScript.</p>
+                    <p>Беру задачу целиком — от идеи и референсов до готовой постройки или технического решения.</p>
+                    <p>Напиши, если нужен хаб, карта или что-то под ваш сервер.</p>`,
+                bioHint: 'Нажмите, чтобы раскрыть',
+                cta: 'Обсудить проект',
+                loc: '/ Москва',
+                modalCta: 'Обсудить этот проект',
+                photos: 'фото'
+            },
+            eng: {
+                bioLabel: 'About',
+                bioMain: `<p><strong>Minecraft Developer</strong></p>
+                    <p>I build hubs, lobbies, spawns and atmospheric maps — focused on style, usability and server vibe.</p>
+                    <p><strong>74+</strong> projects · <strong>4 years</strong> in development</p>
+                    <div class="tags">
+                        <span class="tag">Java</span>
+                        <span class="tag">Spigot / Paper</span>
+                        <span class="tag">Web</span>
+                        <span class="tag">WorldEdit</span>
+                    </div>`,
+                bioExtra: `<p>Also: plugins, websites, Photoshop, HTML/CSS, JavaScript.</p>
+                    <p>I take the full task — from idea and references to a finished build or technical solution.</p>
+                    <p>Message me if you need a hub, a map, or something custom for your server.</p>`,
+                bioHint: 'Click to expand',
+                cta: 'Discuss a project',
+                loc: '/ Moscow',
+                modalCta: 'Discuss this project',
+                photos: 'photos'
+            }
+        };
+
+        function setLang(l) {
+            lang = l;
+            document.getElementById('btn-ru').classList.toggle('active', l === 'ru');
+            document.getElementById('btn-eng').classList.toggle('active', l === 'eng');
+            const t = i18n[l];
+            document.getElementById('bio-label').textContent = t.bioLabel;
+            document.getElementById('bio-main').innerHTML = t.bioMain;
+            document.getElementById('bio-extra').innerHTML = t.bioExtra;
+            document.getElementById('bio-hint').textContent = t.bioHint;
+            document.getElementById('cta-btn').textContent = t.cta;
+            document.getElementById('loc').textContent = t.loc;
+            document.getElementById('modal-cta').textContent = t.modalCta;
+            renderProjects();
+            if (currentProject) openModal(currentProject, false);
+            updateTime();
+        }
+
+        function renderProjects() {
+            const grid = document.getElementById('projects-grid');
+            grid.innerHTML = PROJECTS.map(p => {
+                const data = p[lang];
+                const count = p.images.length;
+                return `
+                    <article class="project" data-id="${p.id}" onclick="openModal(${p.id})">
+                        <img src="${p.images[0]}" alt="${data.title}" loading="lazy">
+                        <div class="overlay">
+                            <div class="title">${data.title}</div>
+                            <div class="meta">
+                                <span class="price">${p.price.toLocaleString('ru-RU')} ₽</span>
+                                ${count > 1 ? `<span class="count">${count} ${i18n[lang].photos}</span>` : ''}
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        function openModal(id, resetSlide = true) {
+            const p = PROJECTS.find(x => x.id === id);
+            if (!p) return;
+            currentProject = id;
+            if (resetSlide) slideIndex = 0;
+
+            const data = p[lang];
+            document.getElementById('modal-title').textContent = data.title;
+            document.getElementById('modal-price').textContent = p.price.toLocaleString('ru-RU') + ' ₽';
+            document.getElementById('modal-desc').innerHTML = data.desc;
+            document.getElementById('modal-tags').innerHTML = p.tags.map(t => `<span class="info-tag">${t}</span>`).join('');
+
+            document.getElementById('gallery-track').innerHTML = p.images.map(src =>
+                `<div class="gallery-slide"><img src="${src}" alt=""></div>`
+            ).join('');
+
+            document.getElementById('gallery-dots').innerHTML = p.images.map((_, i) =>
+                `<button class="gallery-dot ${i === slideIndex ? 'active' : ''}" onclick="goToSlide(${i})"></button>`
+            ).join('');
+
+            document.getElementById('gallery-thumbs').innerHTML = p.images.map((src, i) =>
+                `<img class="gallery-thumb ${i === slideIndex ? 'active' : ''}" src="${src}" onclick="goToSlide(${i})" alt="">`
+            ).join('');
+
+            const showNav = p.images.length > 1;
+            document.getElementById('gal-prev').style.display = showNav ? '' : 'none';
+            document.getElementById('gal-next').style.display = showNav ? '' : 'none';
+            document.getElementById('gallery-dots').style.display = showNav ? '' : 'none';
+            document.getElementById('gallery-thumbs').style.display = showNav ? '' : 'none';
+            document.getElementById('gallery-counter').style.display = showNav ? '' : 'none';
+
+            updateGallery();
+            document.getElementById('modal').classList.add('open');
+            document.body.classList.add('no-scroll');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('open');
+            document.body.classList.remove('no-scroll');
+            currentProject = null;
+        }
+
+        function updateGallery() {
+            const p = PROJECTS.find(x => x.id === currentProject);
+            if (!p) return;
+            document.getElementById('gallery-track').style.transform = `translateX(-${slideIndex * 100}%)`;
+            document.querySelectorAll('.gallery-dot').forEach((d, i) => d.classList.toggle('active', i === slideIndex));
+            document.querySelectorAll('.gallery-thumb').forEach((d, i) => d.classList.toggle('active', i === slideIndex));
+            document.getElementById('gallery-counter').textContent = `${slideIndex + 1} / ${p.images.length}`;
+        }
+
+        function goToSlide(i) {
+            const p = PROJECTS.find(x => x.id === currentProject);
+            if (!p) return;
+            slideIndex = (i + p.images.length) % p.images.length;
+            updateGallery();
+        }
+        function nextSlide() { goToSlide(slideIndex + 1); }
+        function prevSlide() { goToSlide(slideIndex - 1); }
+
+        document.getElementById('modal-close').addEventListener('click', closeModal);
+        document.getElementById('modal-backdrop').addEventListener('click', closeModal);
+        document.getElementById('gal-prev').addEventListener('click', e => { e.stopPropagation(); prevSlide(); });
+        document.getElementById('gal-next').addEventListener('click', e => { e.stopPropagation(); nextSlide(); });
+
+        document.addEventListener('keydown', e => {
+            if (!currentProject) return;
+            if (e.key === 'Escape') closeModal();
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        const gallery = document.getElementById('gallery');
+        gallery.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        gallery.addEventListener('touchend', e => {
+            const dx = e.changedTouches[0].screenX - touchStartX;
+            if (Math.abs(dx) > 50) {
+                if (dx < 0) nextSlide();
+                else prevSlide();
+            }
+        }, { passive: true });
+
+        document.getElementById('bio-card').addEventListener('click', () => {
+            document.getElementById('bio-card').classList.toggle('open');
+        });
+
+        document.getElementById('avatar-btn').addEventListener('click', e => {
+            e.stopPropagation();
+            document.body.classList.toggle('light');
+        });
+
+        document.getElementById('clock').addEventListener('click', function () {
+            this.classList.remove('flip');
+            void this.offsetWidth;
+            this.classList.add('flip');
+        });
+
+        function updateTime() {
+            const isEng = lang === 'eng';
+            const opts = { timeZone: 'Europe/Moscow', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: isEng };
+            document.getElementById('time').textContent = new Intl.DateTimeFormat(isEng ? 'en-US' : 'ru-RU', opts).format(new Date());
+        }
+        setInterval(updateTime, 1000);
+
+        /* ===== Preloader snow + stars (realistic) ===== */
+        (function initWinterPreloader() {
+            const snowCanvas = document.getElementById('snow-canvas');
+            if (!snowCanvas) return;
+            const sctx = snowCanvas.getContext('2d');
+            let sw = 0, sh = 0, sdpr = 1;
+            const flakes = [];
+            const FLAKE_COUNT = 140;
+            let wind = 0;
+            let windTarget = 0;
+            let lastT = performance.now();
+
+            function resizeSnow() {
+                sdpr = Math.min(window.devicePixelRatio || 1, 2);
+                sw = window.innerWidth;
+                sh = window.innerHeight;
+                snowCanvas.width = sw * sdpr;
+                snowCanvas.height = sh * sdpr;
+                snowCanvas.style.width = sw + 'px';
+                snowCanvas.style.height = sh + 'px';
+                sctx.setTransform(sdpr, 0, 0, sdpr, 0, 0);
+            }
+
+            // depth layer 0 = far, 2 = near
+            function spawnFlake(yRandom) {
+                const layer = Math.random() < 0.5 ? 0 : (Math.random() < 0.65 ? 1 : 2);
+                const layerScale = [0.45, 0.85, 1.35][layer];
+                const baseR = (0.5 + Math.random() * 1.6) * layerScale;
+                return {
+                    x: Math.random() * (sw + 40) - 20,
+                    y: yRandom ? Math.random() * sh : -20 - Math.random() * 60,
+                    r: baseR,
+                    layer,
+                    // heavier / nearer flakes fall a bit faster
+                    speed: (0.35 + Math.random() * 0.9) * (0.7 + layer * 0.45),
+                    // individual sway
+                    swayAmp: (0.3 + Math.random() * 1.1) * (0.6 + layer * 0.3),
+                    swaySpeed: 0.008 + Math.random() * 0.02,
+                    swayPhase: Math.random() * Math.PI * 2,
+                    // spin for crystal flakes
+                    rot: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.025,
+                    opacity: [0.2, 0.4, 0.7][layer] + Math.random() * 0.15,
+                    // only larger near flakes draw as crystals
+                    crystal: layer === 2 && Math.random() > 0.45,
+                    arms: 6
+                };
+            }
+
+            function initFlakes() {
+                flakes.length = 0;
+                for (let i = 0; i < FLAKE_COUNT; i++) flakes.push(spawnFlake(true));
+            }
+
+            function drawCrystal(ctx, x, y, r, rot, alpha) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(rot);
+                ctx.strokeStyle = `rgba(235, 245, 255, ${alpha})`;
+                ctx.lineWidth = Math.max(0.6, r * 0.18);
+                ctx.lineCap = 'round';
+                for (let i = 0; i < 6; i++) {
+                    ctx.rotate(Math.PI / 3);
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(0, -r);
+                    // small side branches
+                    const b = r * 0.45;
+                    ctx.moveTo(0, -r * 0.55);
+                    ctx.lineTo(-b * 0.35, -r * 0.55 - b * 0.25);
+                    ctx.moveTo(0, -r * 0.55);
+                    ctx.lineTo(b * 0.35, -r * 0.55 - b * 0.25);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            let snowRunning = true;
+            function drawSnow(now) {
+                if (!snowRunning) return;
+                const dt = Math.min(32, now - lastT) / 16.67; // ~1 at 60fps
+                lastT = now;
+
+                // smooth changing wind
+                if (Math.random() < 0.005) windTarget = (Math.random() - 0.5) * 1.8;
+                wind += (windTarget - wind) * 0.008 * dt;
+
+                sctx.clearRect(0, 0, sw, sh);
+
+                // draw far -> near for correct depth
+                for (let layer = 0; layer <= 2; layer++) {
+                    for (const f of flakes) {
+                        if (f.layer !== layer) continue;
+
+                        f.swayPhase += f.swaySpeed * dt;
+                        f.rot += f.rotSpeed * dt;
+
+                        const sway = Math.sin(f.swayPhase) * f.swayAmp;
+                        // wind affects nearer flakes a bit more
+                        const windFx = wind * (0.5 + f.layer * 0.35);
+                        f.x += (sway * 0.15 + windFx) * dt;
+                        f.y += f.speed * dt;
+
+                        if (f.y > sh + 24) {
+                            Object.assign(f, spawnFlake(false));
+                            f.y = -16 - Math.random() * 30;
+                        }
+                        if (f.x < -30) f.x = sw + 20;
+                        if (f.x > sw + 30) f.x = -20;
+
+                        if (f.crystal && f.r > 1.4) {
+                            drawCrystal(sctx, f.x, f.y, f.r * 2.2, f.rot, f.opacity);
+                        } else {
+                            // soft round flake with slight glow
+                            const g = sctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r * 2.5);
+                            g.addColorStop(0, `rgba(240, 248, 255, ${f.opacity})`);
+                            g.addColorStop(0.45, `rgba(210, 230, 255, ${f.opacity * 0.45})`);
+                            g.addColorStop(1, 'rgba(180, 210, 255, 0)');
+                            sctx.beginPath();
+                            sctx.arc(f.x, f.y, f.r * 2.5, 0, Math.PI * 2);
+                            sctx.fillStyle = g;
+                            sctx.fill();
+                        }
+                    }
+                }
+                requestAnimationFrame(drawSnow);
+            }
+
+            resizeSnow();
+            initFlakes();
+            requestAnimationFrame(drawSnow);
+            window.addEventListener('resize', () => { resizeSnow(); initFlakes(); });
+
+            // twinkling stars
+            const sparklesEl = document.getElementById('preloader-sparkles');
+            if (sparklesEl) {
+                for (let i = 0; i < 45; i++) {
+                    const s = document.createElement('div');
+                    s.className = 'sparkle';
+                    s.style.left = Math.random() * 100 + '%';
+                    s.style.top = Math.random() * 100 + '%';
+                    s.style.setProperty('--dur', (2.5 + Math.random() * 4) + 's');
+                    s.style.setProperty('--delay', (Math.random() * 4) + 's');
+                    const size = 1.2 + Math.random() * 2.2;
+                    s.style.width = size + 'px';
+                    s.style.height = size + 'px';
+                    sparklesEl.appendChild(s);
+                }
+            }
+
+            window._stopPreloaderSnow = () => { snowRunning = false; };
+        })();
+
+        window.addEventListener('load', () => {
+            setLang('ru');
+            updateTime();
+
+            const ring = document.getElementById('preloader-ring');
+            const fill = document.getElementById('preloader-fill');
+            let p = 0;
+            const interval = setInterval(() => {
+                p += 2.2;
+                if (p > 100) p = 100;
+                ring.style.setProperty('--p', (p / 100 * 360) + 'deg');
+                fill.style.width = p + '%';
+                if (p >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        document.getElementById('preloader').classList.add('hide');
+                        document.body.classList.remove('no-scroll');
+                        document.getElementById('content').classList.add('visible');
+                        if (window._stopPreloaderSnow) window._stopPreloaderSnow();
+                    }, 400);
+                }
+            }, 20);
+        });
+    </script>
+</body>
+
+</html>
